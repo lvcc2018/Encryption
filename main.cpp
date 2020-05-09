@@ -2,13 +2,14 @@
 #include <iostream>
 #include <fstream>
 #include "DES.h"
-#include "utils.h"
+#include "AES128.h"
 #include <time.h>
 
 using namespace std;
 
 int main()
 {
+    /*
     rand_plain_text();
     DES cm;
     string test;
@@ -30,5 +31,7 @@ int main()
     ofstream translate_file("translate_text.txt");
     translate_file<<trans_text;
     translate_file.close();
+    */
+    AES128 aes;
     return 0;
 }
