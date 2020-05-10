@@ -135,6 +135,17 @@ std::string string_xor(string str1, string str2, int length)
     return temp;
 }
 
+string string_xor_ul(string str, unsigned int integer)
+{
+    string temp;
+    temp.resize(4);
+    for(int i=0;i<4;i++)
+    {
+        temp[i] = str[i]^(integer>>(i*8));
+    }
+    return temp;
+}
+
 void left_cycle(string& str, int length, int dis)
 {
     string temp = str.substr(0, dis);
@@ -149,6 +160,116 @@ void left_cycle(string& str, int length, int dis)
     return;
 }
 
+void leftLoop4int(int array[4], int step) {
+    int temp[4];
+    for(int i = 0; i < 4; i++)
+        temp[i] = array[i];
 
+    int index = step % 4 == 0 ? 0 : step % 4;
+    for(int i = 0; i < 4; i++){
+        array[i] = temp[index];
+        index++;
+        index = index % 4;
+    }
+}
+
+string leftLoopBit(string str, int dis)
+{
+    unsigned int str_int = stoi(str);
+    str_int = (str_int<<dis)|(str_int>>(32-dis));
+    string str_result = to_string(str_int);
+    return str_result;
+}
+
+void rightLoop4int(int array[4], int step) {
+	int temp[4];
+	for(int i = 0; i < 4; i++)
+		temp[i] = array[i];
+
+	int index = step % 4 == 0 ? 0 : step % 4;
+	index = 3 - index;
+	for(int i = 3; i >= 0; i--) {
+		array[i] = temp[index];
+		index--;
+		index = index == -1 ? 3 : index;
+	}
+}
+
+static const int colM[4][4] = { 2, 3, 1, 1,
+	1, 2, 3, 1,
+	1, 1, 2, 3,
+	3, 1, 1, 2 };
+const int deColM[4][4] = { 0xe, 0xb, 0xd, 0x9,
+	0x9, 0xe, 0xb, 0xd,
+	0xd, 0x9, 0xe, 0xb,
+	0xb, 0xd, 0x9, 0xe };
+
+static int GFMul2(int s) {
+	int result = s << 1;
+	int a7 = result & 0x00000100;
+
+	if(a7 != 0) {
+		result = result & 0x000000ff;
+		result = result ^ 0x1b;
+	}
+
+	return result;
+}
+
+static int GFMul3(int s) {
+	return GFMul2(s) ^ s;
+}
+
+static int GFMul4(int s) {
+	return GFMul2(GFMul2(s));
+}
+
+static int GFMul8(int s) {
+	return GFMul2(GFMul4(s));
+}
+
+static int GFMul9(int s) {
+	return GFMul8(s) ^ s;
+}
+
+static int GFMul11(int s) {
+	return GFMul9(s) ^ GFMul2(s);
+}
+
+static int GFMul12(int s) {
+	return GFMul8(s) ^ GFMul4(s);
+}
+
+static int GFMul13(int s) {
+	return GFMul12(s) ^ s;
+}
+
+static int GFMul14(int s) {
+	return GFMul12(s) ^ GFMul2(s);
+}
+
+/**
+ * GF上的二元运算
+ */
+static int GFMul(int n, int s) {
+	int result;
+
+	if(n == 1)
+		result = s;
+	else if(n == 2)
+		result = GFMul2(s);
+	else if(n == 3)
+		result = GFMul3(s);
+	else if(n == 0x9)
+		result = GFMul9(s);
+	else if(n == 0xb)//11
+		result = GFMul11(s);
+	else if(n == 0xd)//13
+		result = GFMul13(s);
+	else if(n == 0xe)//14
+		result = GFMul14(s);
+
+	return result;
+}
 
 #endif

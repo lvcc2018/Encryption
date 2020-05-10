@@ -26,7 +26,22 @@ public:
     AES128();
     ~AES128();
     void encrypt_block(string& str);
+    void convert_matrix_to_str(string& str, int mat[4][4]);
+    void convert_str_to_matrix(string& str, int mat[4][4]);
+    void add_round_key(int mat[4][4], int round);
+    void sub_bytes(int mat[4][4]);
+    void shift_rows(int mat[4][4]);
+    void mix_columns(int mat[4][4]);
     
+    void decrypt_block(string& str);
+    void desub_bytes(int mat[4][4]);
+    void deshift_rows(int mat[4][4]);
+    void demix_columns(int mat[4][4]);
+    void get_mat_from4W(int i, int mat[4][4]);
+    
+    string encrypt(string& plain_text);
+    string decrypt(string& cipher_text);
+
 };
 
 

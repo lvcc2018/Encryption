@@ -120,7 +120,7 @@ AES128::AES128()
     create_subkey();
 }
 
-AES128::~AES128(){}
+AES128::~AES128() {}
 
 void AES128::create_subkey()
 {
@@ -143,9 +143,9 @@ void AES128::create_subkey()
     {
         for (int j = 0; j < 4; j++)
         {
-            cout<<int(subkey[i][j])<<' ';
+            cout << int(subkey[i][j]) << ' ';
         }
-        cout<<endl;
+        cout << endl;
     }
 }
 
@@ -155,4 +155,197 @@ string AES128::T_func(string str, int length, int round)
     S_transform(str, 4);
     str[0] ^= Rcon[round];
     return str;
+}
+
+void AES128::encrypt_block(string &str)
+{
+    int p[4][4];
+    convert_str_to_matrix(str, p);
+    add_round_key(p, 0);
+    for (int i = 1; i < 10; i++)
+    {
+        sub_bytes(p);
+        shift_rows(p);
+        mix_columns(p);
+        add_round_key(p, i);
+    }
+    sub_bytes(p);
+    shift_rows(p);
+    add_round_key(p, 10);
+    convert_matrix_to_str(str, p);
+}
+
+
+void AES128::decrypt_block(string &str)
+{
+    int p[4][4];
+    int w[4][4];
+    convert_str_to_matrix(str, p);
+    add_round_key(p, 10);
+    for (int i = 9; i >0; i--)
+    {
+        desub_bytes(p);
+        deshift_rows(p);
+        demix_columns(p);
+        get_mat_from4W(i, w);
+        demix_columns(w);
+        
+        for(int j = 0; j < 4; j++)
+		    for(int k = 0; k < 4; k++)
+			    p[j][k] = p[j][k] ^ w[j][k];
+    }
+    desub_bytes(p);
+    deshift_rows(p);
+    add_round_key(p, 0);
+    convert_matrix_to_str(str, p);
+}
+
+void AES128::get_mat_from4W(int i,int mat[4][4])
+{
+	int index = i * 4;
+	for(int i = 0; i < 4; i++) {
+		mat[i][0] = subkey[index][i];
+		mat[i][1] = subkey[index+1][i];
+		mat[i][2] = subkey[index+2][i];
+		mat[i][3] = subkey[index+3][i];
+	}
+}
+
+void AES128::add_round_key(int mat[4][4], int round)
+{
+    for (int i = 0; i < 4; i++)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            mat[j][i] = mat[j][i] ^ subkey[round * 4 + i][j];
+        }
+    }
+}
+
+void AES128::sub_bytes(int mat[4][4])
+{
+    for (int i = 0; i < 4; i++)
+        for (int j = 0; j < 4; j++)
+            mat[i][j] = S_table[((mat[i][j] & 0x000000f0) >> 4)][mat[i][j] & 0xf];
+}
+void AES128::shift_rows(int mat[4][4])
+{
+    int rowTwo[4], rowThree[4], rowFour[4];
+    //复制状态矩阵的第2,3,4行
+    for (int i = 0; i < 4; i++)
+    {
+        rowTwo[i] = mat[1][i];
+        rowThree[i] = mat[2][i];
+        rowFour[i] = mat[3][i];
+    }
+    //循环左移相应的位数
+    leftLoop4int(rowTwo, 1);
+    leftLoop4int(rowThree, 2);
+    leftLoop4int(rowFour, 3);
+
+    //把左移后的行复制回状态矩阵中
+    for (int i = 0; i < 4; i++)
+    {
+        mat[1][i] = rowTwo[i];
+        mat[2][i] = rowThree[i];
+        mat[3][i] = rowFour[i];
+    }
+}
+
+void AES128::mix_columns(int mat[4][4])
+{
+    int tempmat[4][4];
+
+    for (int i = 0; i < 4; i++)
+        for (int j = 0; j < 4; j++)
+            tempmat[i][j] = mat[i][j];
+
+    for (int i = 0; i < 4; i++)
+        for (int j = 0; j < 4; j++)
+        {
+            mat[i][j] = GFMul(colM[i][0], tempmat[0][j]) ^ GFMul(colM[i][1], tempmat[1][j]) ^ GFMul(colM[i][2], tempmat[2][j]) ^ GFMul(colM[i][3], tempmat[3][j]);
+        }
+}
+void AES128::convert_matrix_to_str(string &str, int mat[4][4])
+{
+    int k = 0;
+    for (int i = 0; i < 4; i++)
+        for (int j = 0; j < 4; j++)
+            str[k++] = mat[j][i];
+}
+void AES128::convert_str_to_matrix(string &str, int mat[4][4])
+{
+    int k = 0;
+    for (int i = 0; i < 4; i++)
+        for (int j = 0; j < 4; j++)
+            mat[j][i] = str[k++];
+}
+
+void AES128::desub_bytes(int mat[4][4])
+{
+    for (int i = 0; i < 4; i++)
+        for (int j = 0; j < 4; j++)
+            mat[i][j] = anti_S_table[((mat[i][j] & 0x000000f0) >> 4)][mat[i][j] & 0xf];
+}
+
+void AES128::deshift_rows(int mat[4][4])
+{
+    int rowTwo[4], rowThree[4], rowFour[4];
+	int i;
+	for(i = 0; i < 4; i++) {
+		rowTwo[i] = mat[1][i];
+		rowThree[i] = mat[2][i];
+		rowFour[i] = mat[3][i];
+	}
+
+	rightLoop4int(rowTwo, 1);
+	rightLoop4int(rowThree, 2);
+	rightLoop4int(rowFour, 3);
+
+	for(i = 0; i < 4; i++) {
+		mat[1][i] = rowTwo[i];
+		mat[2][i] = rowThree[i];
+		mat[3][i] = rowFour[i];
+	}
+
+}
+
+void AES128::demix_columns(int mat[4][4])
+{
+    int tempmat[4][4];
+
+	for(int i = 0; i < 4; i++)
+		for(int j = 0; j < 4; j++)
+			tempmat[i][j] = mat[i][j];
+
+	for(int i = 0; i < 4; i++)
+		for(int j = 0; j < 4; j++){
+			mat[i][j] = GFMul(deColM[i][0],tempmat[0][j]) ^ GFMul(deColM[i][1],tempmat[1][j]) 
+				^ GFMul(deColM[i][2],tempmat[2][j]) ^ GFMul(deColM[i][3], tempmat[3][j]);
+		}
+
+}
+
+string AES128::encrypt(string& plain_text)
+{
+    string result;
+    for (size_t i = 0; i < plain_text.size() / 16; ++i)
+    {
+        string block = plain_text.substr(i * 16, 16);
+        encrypt_block(block);
+        result.append(block);
+    }
+    return result;
+}
+
+string AES128::decrypt(string& cipher_text)
+{
+    string result;
+    for (size_t i = 0; i < cipher_text.size() / 16; ++i)
+    {
+        string block = cipher_text.substr(i * 16, 16);
+        decrypt_block(block);
+        result.append(block);
+    }
+    return result;
 }

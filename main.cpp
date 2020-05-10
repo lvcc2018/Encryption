@@ -31,7 +31,21 @@ int main()
     ofstream translate_file("translate_text.txt");
     translate_file<<trans_text;
     translate_file.close();
-    */
+    
+    string test;
+    ifstream input_file("plain_text.txt");
+    input_file>>test;
+    input_file.close();
     AES128 aes;
+    string result = aes.encrypt(test);
+    ofstream output_file("aes_cipher_text.txt");
+    output_file<<result;
+    output_file.close();
+    string trans_text = aes.decrypt(result);
+    ofstream translate_file("aes_translate_text.txt");
+    translate_file<<trans_text;
+    translate_file.close();
+    */
+   
     return 0;
 }
