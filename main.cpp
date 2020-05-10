@@ -3,6 +3,7 @@
 #include <fstream>
 #include "DES.h"
 #include "AES128.h"
+#include "SM4.h"
 #include <time.h>
 
 using namespace std;
@@ -45,7 +46,21 @@ int main()
     ofstream translate_file("aes_translate_text.txt");
     translate_file<<trans_text;
     translate_file.close();
+
+    string test;
+    ifstream input_file("plain_text.txt");
+    input_file>>test;
+    input_file.close();
+    SM4 sm;
+    string result = sm.encrypt(test);
+    ofstream output_file("sm_cipher_text.txt");
+    output_file<<result;
+    output_file.close();
+    string trans_text = sm.decrypt(result);
+    ofstream translate_file("sm_translate_text.txt");
+    translate_file<<trans_text;
+    translate_file.close();
     */
-   
+
     return 0;
 }

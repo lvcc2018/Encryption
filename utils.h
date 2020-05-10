@@ -7,6 +7,29 @@
 
 using namespace std;
 
+unsigned int string_to_unsigned_int(string str)
+{
+	unsigned int result(0);//最大可表示值为4294967296（=2‘32-1）
+	//从字符串首位读取到末位（下标由0到str.size() - 1）
+	for (int i = str.size()-1;i >= 0;i--)
+	{
+		unsigned int temp(0),k = str.size() - i - 1;
+		//判断是否为数字
+		if (isdigit(str[i]))
+		{
+			//求出数字与零相对位置
+			temp = str[i] - '0';
+			while (k--)
+				temp *= 10;
+			result += temp;
+		}
+		else
+			//exit(-1);
+			break;
+	}
+	return result;
+}
+
 void rand_plain_text()
 {
     ofstream out_file("plain_text.txt");
@@ -175,7 +198,7 @@ void leftLoop4int(int array[4], int step) {
 
 string leftLoopBit(string str, int dis)
 {
-    unsigned int str_int = stoi(str);
+    unsigned int str_int = string_to_unsigned_int(str);
     str_int = (str_int<<dis)|(str_int>>(32-dis));
     string str_result = to_string(str_int);
     return str_result;
@@ -271,5 +294,8 @@ static int GFMul(int n, int s) {
 
 	return result;
 }
+
+
+
 
 #endif

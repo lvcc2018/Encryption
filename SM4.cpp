@@ -76,12 +76,12 @@ void SM4::create_subkey()
         {
             string temp;
             temp.resize(4);
-            temp = string_xor(k[(j+1)%4],k[(j+2)%4],4);
-            temp = string_xor(temp, k[(j+3)%4],4);
-            temp = string_xor_ul(temp, CK_table[i+j]);
+            temp = string_xor(k[(j + 1) % 4], k[(j + 2) % 4], 4);
+            temp = string_xor(temp, k[(j + 3) % 4], 4);
+            temp = string_xor_ul(temp, CK_table[i + j]);
             anti_L_transform(temp);
-            k[j] = string_xor(temp, k[j],4);
-            subkey[i+j] = k[j];
+            k[j] = string_xor(temp, k[j], 4);
+            subkey[i + j] = k[j];
         }
     }
 }
@@ -92,4 +92,75 @@ void SM4::S_transform(string &str)
     {
         str[i] = S_table[str[i]];
     }
+}
+
+void SM4::encrypt_block(string &str)
+{
+    string k[4];
+    for (int i = 0; i < 4; i++)
+        k[i] = str.substr(i * 4, 4);
+    for (int i = 0; i < 32; i += 4)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            string temp;
+            temp.resize(4);
+            temp = string_xor(k[(j + 1) % 4], k[(j + 2) % 4], 4);
+            temp = string_xor(temp, k[(j + 3) % 4], 4);
+            temp = string_xor(temp, subkey[i + j], 4);
+            L_transform(temp);
+            k[j] = string_xor(temp, k[j], 4);
+        }
+    }
+    for (int i = 0; i < 4; i++)
+        for (int j = 0; j < 4; j++)
+            str[(3 - i) * 4 + j] = k[i][j];
+}
+
+void SM4::decrypt_block(string &str)
+{
+    string k[4];
+    for (int i = 0; i < 4; i++)
+        k[i] = str.substr(i * 4, 4);
+    for (int i = 0; i < 32; i += 4)
+    {
+        for (int j = 0; j < 4; j++)
+        {
+            string temp;
+            temp.resize(4);
+            temp = string_xor(k[(j + 1) % 4], k[(j + 2) % 4], 4);
+            temp = string_xor(temp, k[(j + 3) % 4], 4);
+            temp = string_xor(temp, subkey[31 - (i + j)], 4);
+            L_transform(temp);
+            k[j] = string_xor(temp, k[j], 4);
+        }
+    }
+    for (int i = 0; i < 4; i++)
+        for (int j = 0; j < 4; j++)
+            str[(3 - i) * 4 + j] = k[i][j];
+}
+
+string SM4::encrypt(string& plain_text)
+{
+    string result;
+    for (size_t i = 0; i < plain_text.size() / 16; ++i)
+    {
+        string block = plain_text.substr(i * 16, 16);
+        encrypt_block(block);
+        result.append(block);
+    }
+    return result;
+
+}
+
+string SM4::decrypt(string& cipher_text)
+{
+    string result;
+    for (size_t i = 0; i < cipher_text.size() / 16; ++i)
+    {
+        string block = cipher_text.substr(i * 16, 16);
+        decrypt_block(block);
+        result.append(block);
+    }
+    return result;
 }

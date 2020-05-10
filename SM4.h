@@ -19,7 +19,11 @@ private:
 
 public:
     SM4();
-    ~SM4();
+    void encrypt_block(string& str);
+    void decrypt_block(string& str);
+
+    string encrypt(string& plain_text);
+    string decrypt(string& cipher_text);
 };
 
 #endif
