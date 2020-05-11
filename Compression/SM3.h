@@ -10,6 +10,5 @@ typedef struct
     BYTE message[64];
 } SM3_CTX;
 
-void SM3_transform(const BYTE *msg, WORD msg_len, BYTE digest[32]);
 
 #endif
