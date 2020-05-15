@@ -10,7 +10,6 @@ int AES128::Rcon[10] = {0x01, 0x02,
 void AES128::create_S_table()
 {
     int i, j;
-    //初始化S盒
     for (i = 0; i < 0x10; i++)
     {
         for (j = 0; j < 0x10; j++)
@@ -18,7 +17,6 @@ void AES128::create_S_table()
             S_table[i][j] = ((i << 4) & 0xF0) + (j & (0xF));
         }
     }
-    //求在GF(2^8)域上的逆，0映射到自身
     for (i = 0; i < 0x10; i++)
     {
         for (j = 0; j < 0x10; j++)
@@ -29,8 +27,6 @@ void AES128::create_S_table()
             }
         }
     }
-
-    //对每个字节做变换
     for (i = 0; i < 0x10; i++)
     {
         for (j = 0; j < 0x10; j++)
@@ -40,13 +36,11 @@ void AES128::create_S_table()
     }
 }
 
-//逆S盒产生
 void AES128::create_anti_S_table()
 {
     int i, j;
     int b = 0, bb = 0;
 
-    //初始化S盒
     for (i = 0; i < 0x10; i++)
     {
         for (j = 0; j < 0x10; j++)
@@ -54,7 +48,7 @@ void AES128::create_anti_S_table()
             anti_S_table[i][j] = ((i << 4) & 0xF0) + (j & (0xF));
         }
     }
-    //对每个字节做变换
+
     for (i = 0; i < 0x10; i++)
     {
         for (j = 0; j < 0x10; j++)
@@ -63,7 +57,6 @@ void AES128::create_anti_S_table()
         }
     }
 
-    //求在GF(2^8)域上的逆，0映射到自身
     for (i = 0; i < 0x10; i++)
     {
         for (j = 0; j < 0x10; j++)
@@ -102,8 +95,6 @@ void AES128::anti_S_transform(string &str, int length)
 
 AES128::AES128()
 {
-    memset(S_table, 0, sizeof(int) * 256);
-    memset(anti_S_table, 0, sizeof(int) * 256);
     create_S_table();
     create_anti_S_table();
     srand((unsigned)time(NULL));
@@ -225,19 +216,15 @@ void AES128::sub_bytes(int mat[4][4])
 void AES128::shift_rows(int mat[4][4])
 {
     int rowTwo[4], rowThree[4], rowFour[4];
-    //复制状态矩阵的第2,3,4行
     for (int i = 0; i < 4; i++)
     {
         rowTwo[i] = mat[1][i];
         rowThree[i] = mat[2][i];
         rowFour[i] = mat[3][i];
     }
-    //循环左移相应的位数
     leftLoop4int(rowTwo, 1);
     leftLoop4int(rowThree, 2);
     leftLoop4int(rowFour, 3);
-
-    //把左移后的行复制回状态矩阵中
     for (int i = 0; i < 4; i++)
     {
         mat[1][i] = rowTwo[i];

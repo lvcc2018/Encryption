@@ -28,7 +28,7 @@ private:
 	bool SBox_transform(const string &ebs, string &hbs);
 	bool Permute_transform(string &hbs);
 	bool IP_1_transform(string &bs);
-	bool XOR(string &strFirst, string &strSecond, size_t num);
+	bool XOR(string &str1, string &str2, size_t num);
 	bool LeftCycle(string &str, size_t beginSection, size_t endSection, size_t step);
 	static int PC1_table[56];
 	static int Move_table[16];

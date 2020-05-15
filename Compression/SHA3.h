@@ -20,8 +20,8 @@ typedef struct
     WORD H[8], G[8], w[64];
 }SHA3_CTX;
 void SHA3_init(SHA3_CTX *ctx);
-char *SHA3_padding(const BYTE *s, WORD &l);
+char *SHA3_padding(const BYTE *s, WORD &temp_word);
 char* sha(char* s, int len);
-void SHA3_transform(const BYTE *msg, WORD msg_len, BYTE digest[64]);
+void SHA3_transform(const BYTE *msg, WORD msg_len, BYTE hash[64]);
 
 #endif

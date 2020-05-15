@@ -3,8 +3,8 @@ using namespace std;
 void B_M(int a, int nn)
 {
     int i, j, k, n0;
-    int c = 1, m, l[15], d = 0, d1, cc[15];
-    cc[0] = c;
+    int cnum = 1, mnum, l[15], d = 0, dis1, temp[15];
+    temp[0] = cnum;
     for (i = 0; i < nn; i++)
     {
         if (a >> i & 1)
@@ -17,21 +17,21 @@ void B_M(int a, int nn)
         else
         {
             l[i + 1] = 0;
-            cc[i + 1] = 1;
+            temp[i + 1] = 1;
         }
     }
-    c = c ^ ((1 << n0) + 1);
-    cc[n0 + 1] = c;
-    m = n0 - 1;
+    cnum = cnum ^ ((1 << n0) + 1);
+    temp[n0 + 1] = cnum;
+    mnum = n0 - 1;
     for (i = n0 + 1; i < nn; i++)
     {
-        d1 = a >> i & 1;
+        dis1 = a >> i & 1;
         for (j = 1; j <= l[i]; j++)
-            d1 = d1 ^ ((cc[i] >> j & 1) & ((a >> i) - j & 1));
-        d = d ^ (d1 << i);
-        if (d1 == 0)
+            dis1 = dis1 ^ ((temp[i] >> j & 1) & ((a >> i) - j & 1));
+        d = d ^ (dis1 << i);
+        if (dis1 == 0)
         {
-            cc[i + 1] = cc[i];
+            temp[i + 1] = temp[i];
             l[i + 1] = l[i];
         }
         else
@@ -41,8 +41,8 @@ void B_M(int a, int nn)
             else
                 l[i + 1] = l[i];
             if (l[i] > l[i - 1])
-                m = i - 1;
-            cc[i + 1] = cc[i] ^ (cc[m] << (i - m));
+                mnum = i - 1;
+            temp[i + 1] = temp[i] ^ (temp[mnum] << (i - mnum));
         }
     }
     cout << "The LFSR of a(" << nn << ")=(";
@@ -51,7 +51,7 @@ void B_M(int a, int nn)
     cout << ") is " << endl
          << "f(x)=1";
     for (j = 1; j <= nn; j++)
-        if (cc[nn] >> j & 1)
+        if (temp[nn] >> j & 1)
             cout << "+"
                  << "x^" << j;
     cout << endl;

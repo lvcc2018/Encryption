@@ -40,7 +40,7 @@ int DES::Expand_table[48] = {
     23, 24, 25, 26, 27, 28,
     27, 28, 29, 30, 31, 0};
 
-int DES::Permute_table[64 / 2] = {
+int DES::Permute_table[32] = {
     15, 6, 19, 20, 28, 11, 27, 16,
     0, 14, 22, 25, 4, 17, 30, 9,
     1, 7, 23, 13, 31, 26, 2, 8,
@@ -198,12 +198,9 @@ bool DES::decrypt_block(string &block)
         Expand_transform(bs.substr(bs.size() / 2), ebs);
         string temp_key = subkey[i];
         XOR(ebs, temp_key, 48);
-
         SBox_transform(ebs, hbs);
         Permute_transform(hbs);
-
         XOR(bs, hbs, hbs.size());
-
         if (i != 0)
             LeftCycle(bs, 0, bs.size(), bs.size() / 2);
     }
@@ -233,7 +230,6 @@ bool DES::create_subkey()
     {
         LeftCycle(PC1bs, 0, 56 / 2, Move_table[i]);
         LeftCycle(PC1bs, 56 / 2, 56, Move_table[i]);
-
         PC2_transform(PC1bs, subkey[i]);
     }
 
@@ -381,11 +377,11 @@ bool DES::LeftCycle(string &str, size_t beginSection, size_t endSection, size_t 
     return true;
 }
 
-bool DES::XOR(string &strFirst, string &strSecond, size_t num)
+bool DES::XOR(string &str1, string &str2, size_t num)
 {
-    if (strFirst.size() < num || strSecond.size() < num)
+    if (str1.size() < num || str2.size() < num)
         return false;
     for (size_t i = 0; i < num; ++i)
-        strFirst[i] ^= strSecond[i];
+        str1[i] ^= str2[i];
     return true;
 }
