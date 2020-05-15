@@ -11,7 +11,7 @@ void swap(unsigned char &a, unsigned char &b)
     a = b;
     b = tmp;
 }
-
+/*
 int main()
 {
     string key;
@@ -48,3 +48,5 @@ int main()
     }
     return 0;
 }
+*/
+

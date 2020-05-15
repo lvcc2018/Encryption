@@ -1,5 +1,5 @@
 #include "SHA3.h"
-#include "utils.h"
+
 #include <memory.h>
 
 void SHA3_init(SHA3_CTX *ctx)

@@ -1,7 +1,7 @@
 
 #include "DES.h"
 using namespace std;
-int DES::PC1_table[PC_1_SIZE] = {
+int DES::PC1_table[56] = {
     56, 48, 40, 32, 24, 16, 8,
     0, 57, 49, 41, 33, 25, 17,
     9, 1, 58, 50, 42, 34, 26,
@@ -11,8 +11,8 @@ int DES::PC1_table[PC_1_SIZE] = {
     13, 5, 60, 52, 44, 36, 28,
     20, 12, 4, 27, 19, 11, 3};
 
-int DES::Move_table[SUBKEY_NUM] = {23, 10, 2, 5, 9, 2, 3, 2, 3, 2, 5, 7, 2, 9, 2, 7};
-int DES::PC2_table[PC_2_SIZE] = {
+int DES::Move_table[16] = {23, 10, 2, 5, 9, 2, 3, 2, 3, 2, 5, 7, 2, 9, 2, 7};
+int DES::PC2_table[48] = {
     13, 16, 10, 23, 0, 4, 2, 27,
     14, 5, 20, 9, 22, 18, 11, 3,
     25, 7, 15, 6, 26, 19, 12, 1,
@@ -20,7 +20,7 @@ int DES::PC2_table[PC_2_SIZE] = {
     50, 44, 32, 46, 43, 48, 38, 55,
     33, 52, 45, 41, 49, 35, 28, 31};
 
-int DES::IP_table[BIT_STR_SIZE] = {
+int DES::IP_table[64] = {
     57, 49, 41, 33, 25, 17, 9, 1,
     59, 51, 43, 35, 27, 19, 11, 3,
     61, 53, 45, 37, 29, 21, 13, 5,
@@ -30,7 +30,7 @@ int DES::IP_table[BIT_STR_SIZE] = {
     60, 52, 44, 36, 28, 20, 12, 4,
     62, 54, 46, 38, 30, 22, 14, 6};
 
-int DES::Expand_table[EXPAND_SIZE] = {
+int DES::Expand_table[48] = {
     31, 0, 1, 2, 3, 4,
     3, 4, 5, 6, 7, 8,
     7, 8, 9, 10, 11, 12,
@@ -40,13 +40,13 @@ int DES::Expand_table[EXPAND_SIZE] = {
     23, 24, 25, 26, 27, 28,
     27, 28, 29, 30, 31, 0};
 
-int DES::Permute_table[BIT_STR_SIZE / 2] = {
+int DES::Permute_table[64 / 2] = {
     15, 6, 19, 20, 28, 11, 27, 16,
     0, 14, 22, 25, 4, 17, 30, 9,
     1, 7, 23, 13, 31, 26, 2, 8,
     18, 12, 29, 5, 21, 10, 3, 24};
 
-int DES::IP_1_table[BIT_STR_SIZE] = {
+int DES::IP_1_table[64] = {
     39, 7, 47, 15, 55, 23, 63, 31,
     38, 6, 46, 14, 54, 22, 62, 30,
     37, 5, 45, 13, 53, 21, 61, 29,
@@ -56,7 +56,7 @@ int DES::IP_1_table[BIT_STR_SIZE] = {
     33, 1, 41, 9, 49, 17, 57, 25,
     32, 0, 40, 8, 48, 16, 56, 24};
 
-int DES::SBox_table[KEY_SZIE][4][16] = {
+int DES::SBox_table[8][4][16] = {
     //S1
     {{14, 4, 13, 1, 2, 15, 11, 8, 3, 10, 6, 12, 5, 9, 0, 7},
      {0, 15, 7, 4, 14, 2, 13, 1, 10, 6, 12, 11, 9, 5, 3, 8},
@@ -98,39 +98,41 @@ int DES::SBox_table[KEY_SZIE][4][16] = {
      {7, 11, 4, 1, 9, 12, 14, 2, 0, 6, 10, 13, 15, 3, 5, 8},
      {2, 1, 14, 7, 4, 10, 8, 13, 15, 12, 9, 0, 3, 5, 6, 11}}};
 
-DES::DES() 
+string DES::get_key()
+{
+    return key;
+}
+
+DES::DES()
 {
     srand((unsigned)time(NULL));
-    char key_chr[64];
-    for (int i=0;i<64;i++)
+    char key_chr[8];
+    for (int i = 0; i < 8; i++)
     {
         key_chr[i] = (rand() % 26) + 65;
     }
     key = key_chr;
+    key.resize(8);
     create_subkey();
 }
 DES::~DES() {}
-
 string DES::encrypt(const string &plain)
 {
     string result;
-    if (plain.empty() || key.empty())
-        return result;
     for (size_t i = 0; i < plain.size() / 8; ++i)
     {
         string block = plain.substr(i * 8, 8);
         encrypt_block(block);
         result.append(block);
     }
-    int remainder = plain.size() % 8;
-    if (remainder)
+    int r = plain.size() % 8;
+    if (r)
     {
-        string block = plain.substr(plain.size() - remainder, remainder);
-        block.append(8 - remainder, '\0');
+        string block = plain.substr(plain.size() - r, r);
+        block.append(8 - r, '\0');
         encrypt_block(block);
         result.append(block);
     }
-
     return result;
 }
 
@@ -147,235 +149,220 @@ string DES::decrypt(const string &cipher)
         decrypt_block(block);
         result.append(block);
     }
-
     return result;
 }
 
 bool DES::encrypt_block(string &block)
 {
-    if (block.size() != KEY_SZIE)
+    if (block.size() != 8)
         return false;
-
-    string bitStr;
-    bitStr.resize(BIT_STR_SIZE);
-    Char8ToBit64(block, bitStr);
-
-    IP_transform(bitStr);
-
-    string halfBitStr;
-    halfBitStr.resize(bitStr.size() / 2);
-    string eBitStr;
-    eBitStr.resize(EXPAND_SIZE);
-    for (size_t i = 0; i < SUBKEY_NUM; ++i)
+    string bs;
+    bs.resize(64);
+    Char8ToBit64(block, bs);
+    IP_transform(bs);
+    string hbs;
+    hbs.resize(bs.size() / 2);
+    string ebs;
+    ebs.resize(48);
+    for (size_t i = 0; i < 16; ++i)
     {
-        Expand_transform(bitStr.substr(bitStr.size() / 2), eBitStr);
+        Expand_transform(bs.substr(bs.size() / 2), ebs);
         string temp_key = subkey[i];
-        XOR(eBitStr, temp_key, SUBKEY_LENGHT);
-
-        SBox_transform(eBitStr, halfBitStr);
-
-        Permute_transform(halfBitStr);
-
-        XOR(bitStr, halfBitStr, halfBitStr.size());
-
-        if (i != SUBKEY_NUM - 1)
-            LeftCycle(bitStr, 0, bitStr.size(), bitStr.size() / 2);
+        XOR(ebs, temp_key, 48);
+        SBox_transform(ebs, hbs);
+        Permute_transform(hbs);
+        XOR(bs, hbs, hbs.size());
+        if (i != 16 - 1)
+            LeftCycle(bs, 0, bs.size(), bs.size() / 2);
     }
-    IP_1_transform(bitStr);
-
-    Bit64ToChar8(bitStr, block);
-
+    IP_1_transform(bs);
+    Bit64ToChar8(bs, block);
     return true;
 }
 
 bool DES::decrypt_block(string &block)
 {
-    if (block.size() != KEY_SZIE)
+    if (block.size() != 8)
         return false;
 
-    string bitStr;
-    bitStr.resize(BIT_STR_SIZE);
-    Char8ToBit64(block, bitStr);
-
-    IP_transform(bitStr);
-
-    string halfBitStr;
-    halfBitStr.resize(bitStr.size() / 2);
-    string eBitStr;
-    eBitStr.resize(EXPAND_SIZE);
-    for (int i = SUBKEY_NUM - 1; i >= 0; --i)
+    string bs;
+    bs.resize(64);
+    Char8ToBit64(block, bs);
+    IP_transform(bs);
+    string hbs;
+    hbs.resize(bs.size() / 2);
+    string ebs;
+    ebs.resize(48);
+    for (int i = 16 - 1; i >= 0; --i)
     {
-        Expand_transform(bitStr.substr(bitStr.size() / 2), eBitStr);
+        Expand_transform(bs.substr(bs.size() / 2), ebs);
         string temp_key = subkey[i];
-        XOR(eBitStr, temp_key, SUBKEY_LENGHT);
+        XOR(ebs, temp_key, 48);
 
-        SBox_transform(eBitStr, halfBitStr);
-        Permute_transform(halfBitStr);
+        SBox_transform(ebs, hbs);
+        Permute_transform(hbs);
 
-        XOR(bitStr, halfBitStr, halfBitStr.size());
+        XOR(bs, hbs, hbs.size());
 
         if (i != 0)
-            LeftCycle(bitStr, 0, bitStr.size(), bitStr.size() / 2);
+            LeftCycle(bs, 0, bs.size(), bs.size() / 2);
     }
-    IP_1_transform(bitStr);
-    Bit64ToChar8(bitStr, block);
-
+    IP_1_transform(bs);
+    Bit64ToChar8(bs, block);
     return true;
 }
 
 bool DES::create_subkey()
 {
     string tmpKey(key);
-    if (tmpKey.size() < KEY_SZIE)
-        tmpKey.append(KEY_SZIE - tmpKey.size(), '\0');
-    else if (tmpKey.size() > KEY_SZIE)
-        tmpKey = tmpKey.substr(0, KEY_SZIE);
+    if (tmpKey.size() < 8)
+        tmpKey.append(8 - tmpKey.size(), '\0');
+    else if (tmpKey.size() > 8)
+        tmpKey = tmpKey.substr(0, 8);
 
-    string bitStr;
-    bitStr.resize(BIT_STR_SIZE); // 64
-    Char8ToBit64(tmpKey, bitStr);
+    string bs;
+    bs.resize(64);
+    Char8ToBit64(tmpKey, bs);
 
-    string PC1BitStr;
-    PC1BitStr.resize(PC_1_SIZE); //56
-    if (!PC1_transform(bitStr, PC1BitStr))
+    string PC1bs;
+    PC1bs.resize(56);
+    if (!PC1_transform(bs, PC1bs))
         return false;
 
-    for (int i = 0; i < SUBKEY_NUM; ++i)
+    for (int i = 0; i < 16; ++i)
     {
-        LeftCycle(PC1BitStr, 0, PC_1_SIZE / 2, Move_table[i]);
-        LeftCycle(PC1BitStr, PC_1_SIZE / 2, PC_1_SIZE, Move_table[i]);
+        LeftCycle(PC1bs, 0, 56 / 2, Move_table[i]);
+        LeftCycle(PC1bs, 56 / 2, 56, Move_table[i]);
 
-        PC2_transform(PC1BitStr, subkey[i]); // 48
+        PC2_transform(PC1bs, subkey[i]);
     }
 
     return true;
 }
 
-bool DES::PC1_transform(const string &bitStr, string &PC1BitStr)
+bool DES::PC1_transform(const string &bs, string &PC1bs)
 {
-    if (bitStr.size() != BIT_STR_SIZE || PC1BitStr.size() != PC_1_SIZE)
+    if (bs.size() != 64 || PC1bs.size() != 56)
         return false;
 
-    for (size_t i = 0; i < PC1BitStr.size(); ++i)
-        PC1BitStr[i] = bitStr[PC1_table[i]];
+    for (size_t i = 0; i < PC1bs.size(); ++i)
+        PC1bs[i] = bs[PC1_table[i]];
 
     return true;
 }
 
-bool DES::PC2_transform(const string &PC1BitStr, char subKey[SUBKEY_LENGHT])
+bool DES::PC2_transform(const string &PC1bs, char subKey[48])
 {
-    if (PC1BitStr.size() != PC_1_SIZE)
+    if (PC1bs.size() != 56)
         return false;
 
-    for (size_t i = 0; i < PC_2_SIZE; ++i)
-        subKey[i] = PC1BitStr[PC2_table[i]];
+    for (size_t i = 0; i < 48; ++i)
+        subKey[i] = PC1bs[PC2_table[i]];
 
     return true;
 }
 
-bool DES::IP_transform(string &bitStr)
+bool DES::IP_transform(string &bs)
 {
-    if (bitStr.size() != BIT_STR_SIZE)
+    if (bs.size() != 64)
         return false;
 
-    string tmpBitStr;
-    tmpBitStr.resize(bitStr.size());
-    for (size_t i = 0; i < bitStr.size(); ++i)
-        tmpBitStr[i] = bitStr[IP_table[i]];
+    string tmpbs;
+    tmpbs.resize(bs.size());
+    for (size_t i = 0; i < bs.size(); ++i)
+        tmpbs[i] = bs[IP_table[i]];
 
-    bitStr.swap(tmpBitStr);
+    bs.swap(tmpbs);
 
     return true;
 }
 
-bool DES::Expand_transform(const string &halfBitStr, string &eBitStr)
+bool DES::Expand_transform(const string &hbs, string &ebs)
 {
-    if (halfBitStr.size() != BIT_STR_SIZE / 2 || eBitStr.size() != EXPAND_SIZE)
+    if (hbs.size() != 64 / 2 || ebs.size() != 48)
         return false;
 
-    for (size_t i = 0; i < eBitStr.size(); ++i)
-        eBitStr[i] = halfBitStr[Expand_table[i]];
+    for (size_t i = 0; i < ebs.size(); ++i)
+        ebs[i] = hbs[Expand_table[i]];
 
     return true;
 }
 
-bool DES::SBox_transform(const string &eBitStr, string &halfBitStr)
+bool DES::SBox_transform(const string &ebs, string &hbs)
 {
-    if (eBitStr.size() != EXPAND_SIZE || halfBitStr.size() != BIT_STR_SIZE / 2)
+    if (ebs.size() != 48 || hbs.size() != 64 / 2)
         return false;
 
-    for (size_t i = 0; i < KEY_SZIE; ++i)
+    for (size_t i = 0; i < 8; ++i)
     {
         size_t j = i * 6;
-        size_t row = (eBitStr[j] << 1) + eBitStr[j + eBitStr.size() / KEY_SZIE - 1];
-        size_t column = (eBitStr[j + 1] << 3) + (eBitStr[j + 2] << 2) + (eBitStr[j + 3] << 1) + eBitStr[j + 4];
+        size_t row = (ebs[j] << 1) + ebs[j + ebs.size() / 8 - 1];
+        size_t column = (ebs[j + 1] << 3) + (ebs[j + 2] << 2) + (ebs[j + 3] << 1) + ebs[j + 4];
         int x = SBox_table[i][row][column];
-        halfBitStr[i * 4] = x >> 3;
-        halfBitStr[i * 4 + 1] = (x >> 2) & 0x1;
-        halfBitStr[i * 4 + 2] = (x >> 1) & 0x1;
-        halfBitStr[i * 4 + 3] = x & 0x1;
+        hbs[i * 4] = x >> 3;
+        hbs[i * 4 + 1] = (x >> 2) & 0x1;
+        hbs[i * 4 + 2] = (x >> 1) & 0x1;
+        hbs[i * 4 + 3] = x & 0x1;
     }
     return true;
 }
 
-bool DES::Permute_transform(string &halfBitStr)
+bool DES::Permute_transform(string &hbs)
 {
-    if (halfBitStr.size() != BIT_STR_SIZE / 2)
+    if (hbs.size() != 64 / 2)
         return false;
 
     string tmpStr;
-    tmpStr.resize(halfBitStr.size());
+    tmpStr.resize(hbs.size());
 
-    for (size_t i = 0; i < halfBitStr.size(); ++i)
-        tmpStr[i] = halfBitStr[Permute_table[i]];
+    for (size_t i = 0; i < hbs.size(); ++i)
+        tmpStr[i] = hbs[Permute_table[i]];
 
-    halfBitStr.swap(tmpStr);
+    hbs.swap(tmpStr);
 
     return true;
 }
 
-bool DES::IP_1_transform(string &bitStr)
+bool DES::IP_1_transform(string &bs)
 {
-    if (bitStr.size() != BIT_STR_SIZE)
+    if (bs.size() != 64)
         return false;
 
     string tmpStr;
-    tmpStr.resize(BIT_STR_SIZE);
-    for (size_t i = 0; i < bitStr.size(); ++i)
-        tmpStr[i] = bitStr[IP_1_table[i]];
+    tmpStr.resize(64);
+    for (size_t i = 0; i < bs.size(); ++i)
+        tmpStr[i] = bs[IP_1_table[i]];
 
-    bitStr.swap(tmpStr);
+    bs.swap(tmpStr);
 
     return true;
 }
 
-//-------------------------------------------------------------------------------------基础工具------------------------------------------------
-
-bool DES::Char8ToBit64(const string &str, string &bitStr)
+bool DES::Char8ToBit64(const string &str, string &bs)
 {
-    if (str.size() != KEY_SZIE || bitStr.size() != BIT_STR_SIZE)
+    if (str.size() != 8 || bs.size() != 64)
         return false;
 
     for (size_t i = 0; i < str.size(); ++i)
     {
-        for (size_t j = 0; j < BITS_PER_CHAR; ++j)
-            bitStr[i * BITS_PER_CHAR + j] = (str[i] >> j) & 0x1;
+        for (size_t j = 0; j < 8; ++j)
+            bs[i * 8 + j] = (str[i] >> j) & 0x1;
     }
     return true;
 }
 
-bool DES::Bit64ToChar8(const string &bitStr, string &str)
+bool DES::Bit64ToChar8(const string &bs, string &str)
 {
-    if (bitStr.size() < BIT_STR_SIZE || str.size() != KEY_SZIE)
+    if (bs.size() < 64 || str.size() != 8)
         return false;
 
     str = "";
-    str.resize(KEY_SZIE);
+    str.resize(8);
 
-    for (size_t i = 0; i < KEY_SZIE; ++i)
+    for (size_t i = 0; i < 8; ++i)
     {
-        for (size_t j = 0; j < BITS_PER_CHAR; ++j)
-            str[i] |= bitStr[i * KEY_SZIE + j] << j;
+        for (size_t j = 0; j < 8; ++j)
+            str[i] |= bs[i * 8 + j] << j;
     }
 
     return true;
@@ -388,12 +375,9 @@ bool DES::LeftCycle(string &str, size_t beginSection, size_t endSection, size_t 
 
     size_t tmpStep = step % (endSection - beginSection);
     string tmpStr = str.substr(beginSection + tmpStep, endSection - beginSection - tmpStep);
-
     tmpStr.append(str.substr(beginSection, tmpStep));
-
     for (size_t i = beginSection; i < endSection; ++i)
         str[i] = tmpStr[i - beginSection];
-
     return true;
 }
 
@@ -401,9 +385,7 @@ bool DES::XOR(string &strFirst, string &strSecond, size_t num)
 {
     if (strFirst.size() < num || strSecond.size() < num)
         return false;
-
     for (size_t i = 0; i < num; ++i)
         strFirst[i] ^= strSecond[i];
-
     return true;
 }

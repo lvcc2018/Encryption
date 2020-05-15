@@ -1,6 +1,5 @@
 #include "AES128.h"
 #include <time.h>
-#include "utils.h"
 
 int AES128::Rcon[10] = {0x01, 0x02,
                         0x04, 0x08,
@@ -20,7 +19,6 @@ void AES128::create_S_table()
         }
     }
     //求在GF(2^8)域上的逆，0映射到自身
-    printf("\r\n");
     for (i = 0; i < 0x10; i++)
     {
         for (j = 0; j < 0x10; j++)
@@ -66,7 +64,6 @@ void AES128::create_anti_S_table()
     }
 
     //求在GF(2^8)域上的逆，0映射到自身
-    printf("\r\n");
     for (i = 0; i < 0x10; i++)
     {
         for (j = 0; j < 0x10; j++)
@@ -122,6 +119,11 @@ AES128::AES128()
 
 AES128::~AES128() {}
 
+string AES128::get_key()
+{
+    return key;
+}
+
 void AES128::create_subkey()
 {
     for (int i = 0; i < 4; i++)
@@ -138,14 +140,6 @@ void AES128::create_subkey()
         {
             subkey[i] = string_xor(subkey[i - 4], T_func(subkey[i - 1], 4, (i - 4) / 4), 4);
         }
-    }
-    for (int i = 0; i < 44; i++)
-    {
-        for (int j = 0; j < 4; j++)
-        {
-            cout << int(subkey[i][j]) << ' ';
-        }
-        cout << endl;
     }
 }
 

@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <memory.h>
 #include "SHA2.h"
-#include "utils.h"
+#include "compression_utils.h"
 
 static const unsigned int k[64] = {
     0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
@@ -68,7 +68,6 @@ void sha256_transform(SHA256_CTX *ctx, const unsigned char data[])
     ctx->state[6] += g;
     ctx->state[7] += h;
 }
-
 
 void sha256_update(SHA256_CTX *ctx, const unsigned char data[], size_t len, unsigned char hash[])
 {

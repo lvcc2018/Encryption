@@ -2,6 +2,7 @@
 #define _AES128_H_
  
 #include <string>
+#include "utils.h"
 using namespace std;
 
 
@@ -38,6 +39,7 @@ public:
     void deshift_rows(int mat[4][4]);
     void demix_columns(int mat[4][4]);
     void get_mat_from4W(int i, int mat[4][4]);
+    string get_key();
     
     string encrypt(string& plain_text);
     string decrypt(string& cipher_text);

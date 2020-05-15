@@ -1,5 +1,5 @@
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef COMPRESSION_UTILS_H
+#define COMPRESSION_UTILS_H
 
 typedef unsigned char BYTE;
 typedef unsigned int WORD;

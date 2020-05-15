@@ -2,6 +2,7 @@
 #define _SM4_H_
 
 #include <string>
+#include "utils.h"
 using namespace std;
 
 class SM4
@@ -21,6 +22,7 @@ public:
     SM4();
     void encrypt_block(string& str);
     void decrypt_block(string& str);
+    string get_key();
 
     string encrypt(string& plain_text);
     string decrypt(string& cipher_text);

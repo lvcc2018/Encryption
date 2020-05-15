@@ -1,6 +1,5 @@
 #include "SM4.h"
 #include <time.h>
-#include "utils.h"
 
 using namespace std;
 
@@ -63,6 +62,10 @@ SM4::SM4()
     key = key_chr;
     key = key.substr(0, 16);
     create_subkey();
+}
+string SM4::get_key()
+{
+    return key;
 }
 
 void SM4::create_subkey()

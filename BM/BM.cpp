@@ -45,10 +45,10 @@ void B_M(int a, int nn)
             cc[i + 1] = cc[i] ^ (cc[m] << (i - m));
         }
     }
-    cout << "a(" << nn << ")=(";
+    cout << "The LFSR of a(" << nn << ")=(";
     for (i = 0; i < nn; i++)
         cout << (a >> i & 1);
-    cout << ")的线性综合解为：" << endl
+    cout << ") is " << endl
          << "f(x)=1";
     for (j = 1; j <= nn; j++)
         if (cc[nn] >> j & 1)
@@ -56,6 +56,7 @@ void B_M(int a, int nn)
                  << "x^" << j;
     cout << endl;
 }
+/*
 int main()
 {
     int a = 0, nn = 10;
@@ -67,3 +68,4 @@ int main()
     B_M(a, nn);
     return 0;
 }
+*/

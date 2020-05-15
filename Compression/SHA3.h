@@ -2,7 +2,7 @@
 #define SHA3_H
 
 #include <stddef.h>
-#include "utils.h"
+#include "compression_utils.h"
 
 const WORD K[64] = {
     0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
@@ -19,9 +19,9 @@ typedef struct
 {
     WORD H[8], G[8], w[64];
 }SHA3_CTX;
-
-
-
-
+void SHA3_init(SHA3_CTX *ctx);
+char *SHA3_padding(const BYTE *s, WORD &l);
+char* sha(char* s, int len);
+void SHA3_transform(const BYTE *msg, WORD msg_len, BYTE digest[64]);
 
 #endif

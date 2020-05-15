@@ -1,5 +1,4 @@
 #include "SM3.h"
-#include "utils.h"
 #include <memory.h>
 
 static const WORD IV[8] = {0x7380166f, 0x4914b2b9, 0x172442d7, 0xda8a0600,
